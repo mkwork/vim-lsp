@@ -18,17 +18,24 @@ let g:lsp_diagnostics_echo_delay = get(g:, 'lsp_diagnostics_echo_delay', 500)
 let g:lsp_next_sign_id = get(g:, 'lsp_next_sign_id', 6999)
 let g:lsp_preview_keep_focus = get(g:, 'lsp_preview_keep_focus', 1)
 
+let g:lsp_complete_config={
+            \"word": function('lsp#omni#map_word'),
+            \"abbr": function('lsp#omni#map_abbr'),
+            \"menu": function('lsp#omni#get_kind_text'),
+            \"info": "documentation",
+            \"icase": 1,
+            \"dup": 1
+            \ }
+
 if g:lsp_auto_enable
     au VimEnter * call lsp#enable()
 endif
 
 command! LspDefinition call lsp#ui#vim#definition()
 command! LspDocumentSymbol call lsp#ui#vim#document_symbol()
-command! LspDocumentDiagnostics call lsp#ui#vim#diagnostics#document_diagnostics()
-command! -nargs=? -complete=customlist,lsp#utils#empty_complete LspHover call lsp#ui#vim#hover#get_hover_under_cursor()
+command! LspDocumentDiagnostics call lsp#ui#vim#diagnostics#document_diagnostics() command! -nargs=? -complete=customlist,lsp#utils#empty_complete LspHover call lsp#ui#vim#hover#get_hover_under_cursor()
 command! LspReferences call lsp#ui#vim#references()
 command! LspRename call lsp#ui#vim#rename()
 command! LspWorkspaceSymbol call lsp#ui#vim#workspace_symbol()
-command! LspDocumentFormat call lsp#ui#vim#document_format()
-command! -range LspDocumentRangeFormat call lsp#ui#vim#document_range_format()
+command! LspDocumentFormat call lsp#ui#vim#document_format() command! -range LspDocumentRangeFormat call lsp#ui#vim#document_range_format()
 command! LspImplementation call lsp#ui#vim#implementation()

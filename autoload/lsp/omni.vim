@@ -142,25 +142,59 @@ function! s:get_completion_result(data) abort
     return {'matches': l:matches, 'incomplete': l:incomplete}
 endfunction
 
-function! lsp#omni#get_vim_completion_item(item) abort
+function! lsp#omni#map_word(item) abort
     if has_key(a:item, 'insertText') && !empty(a:item['insertText'])
         if has_key(a:item, 'insertTextFormat') && a:item['insertTextFormat'] != 1
             let l:word = a:item['label']
         else
             let l:word = a:item['insertText']
         endif
-        let l:abbr = a:item['label']
     else
         let l:word = a:item['label']
+    endif
+    return l:word
+endfunction
+
+function! lsp#omni#map_abbr(item) abort
+    if has_key(a:item, 'insertText') && !empty(a:item['insertText'])
+        let l:abbr = a:item['label']
+    else
         let l:abbr = a:item['label']
     endif
-    let l:menu = lsp#omni#get_kind_text(a:item)
-    let l:completion = { 'word': l:word, 'abbr': l:abbr, 'menu': l:menu, 'icase': 1, 'dup': 1 }
-    if has_key(a:item, 'documentation')
-        if type(a:item['documentation']) == type('')
-            let l:completion['info'] = a:item['documentation']
+    return l:abbr
+endfunction
+
+function! lsp#omni#map_item(key, item) abort
+    let LspOmniConfig = g:lsp_complete_config[a:key]
+
+    if type(LspOmniConfig) == v:t_string
+
+        if !has_key(a:item, LspOmniConfig)
+            return LspOmniConfig
         endif
+
+        if !type(a:item[LspOmniConfig]) == v:t_string
+            return v:none
+        endif
+        return a:item[LspOmniConfig]
+
+    elseif type(LspOmniConfig) == v:t_func
+        return LspOmniConfig(a:item)
     endif
+
+    return LspOmniConfig
+endfunction
+
+function! lsp#omni#get_vim_completion_item(item) abort
+    let l:completion = {}
+
+    for key in keys(g:lsp_complete_config)
+        let l:value = lsp#omni#map_item(key, a:item)
+        if l:value != v:null && l:value != v:none
+            let l:completion[key] = l:value
+        endif
+    endfor
+
     return l:completion
 endfunction
 
